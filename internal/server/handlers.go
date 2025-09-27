@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -87,8 +88,10 @@ func HandleFeed(cfg config.Config, cache *cache.SourceCache) http.HandlerFunc {
 func filterFeedGF(in *gofeed.Feed, want string) *gofeed.Feed {
 	cp := *in
 	cp.Items = nil
+	log.Printf("Looking for episodes for %s", want)
 	for _, it := range in.Items {
 		if selectType(it.Title) == want {
+			log.Printf("Adding '%s' to %s", it.Title, want)
 			cp.Items = append(cp.Items, it)
 		}
 	}

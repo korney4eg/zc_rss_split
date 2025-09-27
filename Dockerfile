@@ -12,7 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /zc_rss_parser cmd/rsssplit/main.go
 
 FROM alpine
 COPY --from=builder /zc_rss_parser /zc_rss_parser
-EXPOSE 8080
+EXPOSE 8081
 
 # Run
 CMD ["/zc_rss_parser"]
