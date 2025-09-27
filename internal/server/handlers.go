@@ -34,14 +34,9 @@ func HandleFeed(cfg config.Config, cache *cache.SourceCache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		// Определяем тип фида
-		typ := r.URL.Query().Get("type")
-		switch r.URL.Path {
-		case "/sdz", "/kabinet_lora", "/photo", "/zavtracast":
-			typ = strings.TrimPrefix(r.URL.Path, "/")
-		}
-		if typ == "" {
-			typ = "zavtracast"
+		typ := strings.TrimPrefix(r.URL.Path, "/")
+		if _, ok := cfg.TypeMetas[typ]; !ok {
+			return
 		}
 
 		// Забираем данные из кэша/источника
