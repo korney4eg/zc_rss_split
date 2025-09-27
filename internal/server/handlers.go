@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/mmcdole/gofeed"
@@ -127,6 +129,33 @@ func applyTypeMetaGF(f *gofeed.Feed, typ string, cfg config.Config) {
 			},
 		}
 	}
+	newItems := []*gofeed.Item{}
+	for _, item := range f.Items {
+		episodeNumber := getEpisodeNumber(item.Title)
+		if episodeNumber > 0 {
+			log.Printf("Episode number of %s is %d", item.Title, episodeNumber)
+		}
+		episodeImage := m.ImageURL
+		if cfg.TypeMetas[typ].EpisodeImagePattern != "" && episodeNumber > 0 {
+			episodeNumberStr := fmt.Sprintf("%02d", episodeNumber)
+			episodeImage = strings.ReplaceAll(cfg.TypeMetas[typ].EpisodeImagePattern, "--DOUBLE_DIGIT--", episodeNumberStr)
+		}
+		if item.Extensions["itunes"] == nil {
+			item.Extensions["itunes"] = map[string][]ext.Extension{}
+		}
+		if item.Image == nil {
+			item.Image = &gofeed.Image{}
+		}
+		item.Image.URL = episodeImage
+		item.Extensions["itunes"]["image"] = []ext.Extension{
+			{
+				Name:  "image",
+				Attrs: map[string]string{"href": episodeImage},
+			},
+		}
+		newItems = append(newItems, item)
+	}
+	f.Items = newItems
 }
 
 // --- Классификация выпусков ---
@@ -143,4 +172,19 @@ func selectType(title string) string {
 		return "photo"
 	}
 	return "zavtracast"
+}
+
+func getEpisodeNumber(title string) int {
+	re := regexp.MustCompile("[0-9]+")
+	foundNumbers := re.FindAllString(title, -1)
+	if len(foundNumbers) >= 1 {
+		n, err := strconv.Atoi(foundNumbers[0])
+		if err != nil {
+			log.Printf("[ERROR] couldn't parse %s as number: %v", foundNumbers[0], err)
+			return 0
+		}
+		return n
+	}
+	log.Printf("[ERROR] coundn't get number from title %s", title)
+	return 0
 }

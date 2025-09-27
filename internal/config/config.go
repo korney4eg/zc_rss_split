@@ -28,9 +28,10 @@ type TypesBlock struct {
 }
 
 type TypeMeta struct {
-	Title       string `yaml:"title"`
-	Description string `yaml:"description"`
-	ImageURL    string `yaml:"image"`
+	Title               string `yaml:"title"`
+	Description         string `yaml:"description"`
+	ImageURL            string `yaml:"image"`
+	EpisodeImagePattern string `yaml:"episode_image_pattern"`
 }
 
 type Config struct {

@@ -11,8 +11,7 @@ import (
 
 func New(cfg config.Config, cache *cache.SourceCache) *http.Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", HandleIndex(cfg))
-	mux.HandleFunc("/feed", HandleFeed(cfg, cache))
+	// mux.HandleFunc("/", HandleIndex(cfg))
 	mux.HandleFunc("/sdz", HandleFeed(cfg, cache))
 	mux.HandleFunc("/kabinet_lora", HandleFeed(cfg, cache))
 	mux.HandleFunc("/photo", HandleFeed(cfg, cache))
