@@ -32,7 +32,7 @@ func (c *SourceCache) Start(ctx context.Context) {
 	c.started = true
 
 	if _, _, err := c.fetch(ctx); err != nil {
-		log.Printf("initial fetch error: %v", err)
+		log.Printf("[ERROR] initial fetch error: %v", err)
 	}
 
 	t := time.NewTicker(c.cfg.Refresh)
@@ -44,7 +44,7 @@ func (c *SourceCache) Start(ctx context.Context) {
 				return
 			case <-t.C:
 				if _, _, err := c.fetch(context.Background()); err != nil {
-					log.Printf("background fetch error: %v", err)
+					log.Printf("[ERROR] background fetch error: %v", err)
 				}
 			}
 		}
@@ -66,6 +66,7 @@ func (c *SourceCache) Get(ctx context.Context) ([]byte, int, error) {
 
 func (c *SourceCache) fetch(ctx context.Context) ([]byte, int, error) {
 	src := c.cfg.Source
+	log.Printf("Getting data from %s", src)
 	if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
 		req, err := http.NewRequestWithContext(ctx, "GET", src, nil)
 		if err != nil {
@@ -106,6 +107,7 @@ func (c *SourceCache) fetch(ctx context.Context) ([]byte, int, error) {
 		if err != nil {
 			return nil, http.StatusBadGateway, err
 		}
+		log.Printf("Successfully read http feed")
 
 		c.mu.Lock()
 		c.data = append([]byte(nil), body...)
@@ -121,6 +123,7 @@ func (c *SourceCache) fetch(ctx context.Context) ([]byte, int, error) {
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
+	log.Printf("Successfully read local feed")
 	c.mu.Lock()
 	c.data = append([]byte(nil), b...)
 	c.etag = ""

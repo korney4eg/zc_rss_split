@@ -4,13 +4,11 @@ FROM golang:1.24 AS builder
 WORKDIR /app
 
 # Download Go modules
-COPY go.mod go.sum ./
+COPY . ./
 RUN go mod download
 
-COPY *.go ./
-
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /zc_rss_parser
+RUN CGO_ENABLED=0 GOOS=linux go build -o /zc_rss_parser cmd/rsssplit/main.go
 
 FROM alpine
 COPY --from=builder /zc_rss_parser /zc_rss_parser
